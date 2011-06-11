@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+import dotcloud_serviceconfig as svccfg
+from subprocess import Popen, PIPE
+from sys import argv
+import yaml
+import os
+import string
+
+def main(args):
+    appname = args[0]
+    print "Discovering deployments for %s..." % appname
+    deploy_list = run_yaml("dotcloud", "info", appname)
+    output_file = os.path.dirname(svccfg.__file__) + "/config.yaml"
+    output_dict = {}
+
+    for deploy in deploy_list:
+        parts = string.split(deploy, ".", 1)
+        print "Getting config for %s..." % parts[1]
+        config = run_yaml("dotcloud", "info", deploy)
+        output_dict[parts[1]] = config
+
+    print "Writing config to " + output_file
+    f = file(output_file, 'w')
+    yaml.dump(output_dict, f)
+    f.close()
+
+def run(*args):
+    pipe = Popen(args, stdout=PIPE).stdout
+    return pipe.read()
+
+def run_yaml(*args):
+    raw = run(*args)
+    return yaml.load(raw)
+
+main(argv[1:])
