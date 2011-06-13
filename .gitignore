@@ -1,2 +1,3 @@
 dotcloud_serviceconfig/config.yaml
 *.pyc
+*.egg-info
